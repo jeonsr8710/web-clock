@@ -1,4 +1,4 @@
-const CACHE_NAME = "web-clock-pwa-v2";
+const CACHE_NAME = "web-clock-pwa-v3";
 const ASSETS = [
   "./",
   "./index.html",
@@ -24,6 +24,12 @@ self.addEventListener("activate", (event) => {
 
 self.addEventListener("fetch", (event) => {
   event.respondWith(
-    caches.match(event.request).then((cached) => cached || fetch(event.request))
+    fetch(event.request)
+      .then((res) => {
+        const clone = res.clone();
+        caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+        return res;
+      })
+      .catch(() => caches.match(event.request))
   );
 });
