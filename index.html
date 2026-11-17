@@ -1,0 +1,1068 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#202124" />
+  <title>시계 - 타이머 · 스톱워치 · 세계시간</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" type="image/svg+xml" href="icon.svg" />
+  <link rel="apple-touch-icon" href="icon.svg" />
+  <style>
+    :root {
+      --bg: #202124;
+      --surface: #292a2d;
+      --surface-hover: #35363a;
+      --border: #3c4043;
+      --text: #e8eaed;
+      --text-muted: #9aa0a6;
+      --accent: #8ab4f8;
+      --accent-bg: rgba(138, 180, 248, 0.14);
+      --danger: #f28b82;
+      --success: #81c995;
+      --ring-bg: #3c4043;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 16px 16px 84px;
+    }
+
+    header {
+      width: 100%;
+      max-width: 720px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    header h1 {
+      font-size: 1.2rem;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .badge {
+      font-size: 0.75rem;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: var(--surface);
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+    }
+
+    .badge.active {
+      color: var(--accent);
+      border-color: var(--accent);
+    }
+
+    .nav-tabs {
+      width: 100%;
+      max-width: 720px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 4px;
+      margin-bottom: 20px;
+    }
+
+    .tab-btn {
+      background: transparent;
+      color: var(--text-muted);
+      border: none;
+      border-radius: 10px;
+      padding: 10px 8px;
+      font-size: 0.92rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .tab-btn.active {
+      background: var(--accent-bg);
+      color: var(--accent);
+    }
+
+    .tab-panel {
+      width: 100%;
+      max-width: 720px;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .tab-panel.active {
+      display: flex;
+    }
+
+    button {
+      cursor: pointer;
+      border: none;
+      border-radius: 999px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      padding: 10px 18px;
+      transition: background 0.15s, transform 0.05s;
+    }
+    button:active { transform: scale(0.97); }
+
+    .btn-primary { background: var(--accent); color: #202124; }
+    .btn-primary:hover { background: #aecbfa; }
+    .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+    .btn-secondary { background: var(--surface-hover); color: var(--text); }
+    .btn-secondary:hover { background: #414347; }
+
+    .keypad-card {
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 20px;
+      margin-bottom: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .keypad-display {
+      font-size: 2.6rem;
+      font-weight: 400;
+      letter-spacing: 2px;
+      font-variant-numeric: tabular-nums;
+      margin: 6px 0 16px;
+      color: var(--text-muted);
+    }
+
+    .keypad-display.has-value {
+      color: var(--accent);
+    }
+
+    .keypad-display small {
+      font-size: 1.05rem;
+      margin-right: 10px;
+      color: var(--text-muted);
+    }
+
+    .keypad-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 76px);
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .key-btn {
+      width: 76px;
+      height: 54px;
+      border-radius: 28px;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 1.35rem;
+      font-weight: 400;
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .key-btn:hover { background: var(--surface-hover); }
+    .key-btn.action { font-size: 1.05rem; color: var(--text-muted); }
+
+    .creator-row {
+      width: 100%;
+      max-width: 420px;
+      display: flex;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .label-input {
+      flex: 1;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px 14px;
+      color: var(--text);
+      font-size: 0.92rem;
+      outline: none;
+    }
+    .label-input:focus { border-color: var(--accent); }
+
+    .presets {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 6px;
+      width: 100%;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+    }
+
+    .btn-preset {
+      background: var(--bg);
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+      padding: 6px 12px;
+      font-size: 0.8rem;
+    }
+    .btn-preset:hover { color: var(--text); border-color: var(--accent); }
+
+    .timers-grid {
+      width: 100%;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+      gap: 16px;
+    }
+
+    .timer-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .timer-card.ringing {
+      border-color: var(--danger);
+      animation: pulse 0.9s infinite alternate;
+    }
+
+    @keyframes pulse {
+      from { background: var(--surface); }
+      to { background: #3c2626; }
+    }
+
+    .card-top {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .timer-title { font-size: 1rem; font-weight: 500; }
+
+    .btn-delete {
+      background: transparent;
+      color: var(--text-muted);
+      padding: 4px 8px;
+      font-size: 1.05rem;
+    }
+    .btn-delete:hover { color: var(--danger); }
+
+    .ring-wrapper {
+      position: relative;
+      width: 196px;
+      height: 196px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 6px 0 16px;
+    }
+
+    .ring-wrapper svg {
+      transform: rotate(-90deg);
+      width: 196px;
+      height: 196px;
+    }
+
+    .ring-bg { fill: none; stroke: var(--ring-bg); stroke-width: 7; }
+    .ring-progress {
+      fill: none;
+      stroke: var(--accent);
+      stroke-width: 7;
+      stroke-linecap: round;
+      transition: stroke-dashoffset 0.1s linear;
+    }
+    .timer-card.ringing .ring-progress { stroke: var(--danger); }
+
+    .time-display { position: absolute; text-align: center; }
+    .time-main {
+      font-size: 2.2rem;
+      font-variant-numeric: tabular-nums;
+    }
+    .time-sub { font-size: 0.78rem; color: var(--text-muted); margin-top: 4px; }
+
+    .card-controls {
+      display: flex;
+      gap: 8px;
+      width: 100%;
+      justify-content: center;
+    }
+    .card-controls button { flex: 1; max-width: 105px; padding: 9px 10px; }
+    .btn-stop-alarm { background: var(--danger) !important; color: #202124 !important; font-weight: 600; }
+
+    .sw-card {
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 28px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .sw-circle {
+      width: 240px;
+      height: 240px;
+      border-radius: 50%;
+      border: 6px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 24px;
+      transition: border-color 0.2s;
+    }
+
+    .sw-circle.running { border-color: var(--accent); }
+
+    .sw-time {
+      font-size: 2.6rem;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .sw-ms {
+      font-size: 1.35rem;
+      color: var(--accent);
+      font-variant-numeric: tabular-nums;
+      margin-top: 2px;
+    }
+
+    .sw-controls {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .sw-controls button { min-width: 110px; padding: 12px 20px; }
+
+    .lap-list {
+      width: 100%;
+      max-width: 460px;
+      max-height: 260px;
+      overflow-y: auto;
+      border-top: 1px solid var(--border);
+    }
+
+    .lap-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.9rem;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .lap-tag-fast { color: var(--success); font-size: 0.78rem; margin-left: 6px; }
+    .lap-tag-slow { color: var(--danger); font-size: 0.78rem; margin-left: 6px; }
+
+    .wc-hero {
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 24px 20px;
+      text-align: center;
+      margin-bottom: 16px;
+    }
+
+    .wc-local-time {
+      font-size: 3rem;
+      font-weight: 400;
+      font-variant-numeric: tabular-nums;
+      color: var(--accent);
+    }
+
+    .wc-local-date {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      margin-top: 6px;
+    }
+
+    .wc-add-bar {
+      width: 100%;
+      display: flex;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .wc-select {
+      flex: 1;
+      background: var(--surface);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px 14px;
+      font-size: 0.92rem;
+      outline: none;
+    }
+
+    .wc-list {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .wc-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 16px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .wc-city { font-size: 1.05rem; font-weight: 500; }
+    .wc-diff { font-size: 0.8rem; color: var(--text-muted); margin-top: 4px; }
+    .wc-right { display: flex; align-items: center; gap: 14px; }
+    .wc-clock { font-size: 1.65rem; font-variant-numeric: tabular-nums; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>⏱️ 웹 시계</h1>
+    <div class="header-actions">
+      <span id="wakeBadge" class="badge">화면 유지: 대기</span>
+      <button id="notifBtn" class="btn-secondary" style="padding: 6px 12px; font-size: 0.8rem;">알림 허용</button>
+    </div>
+  </header>
+
+  <nav class="nav-tabs">
+    <button class="tab-btn active" data-tab="timerTab">타이머</button>
+    <button class="tab-btn" data-tab="stopwatchTab">스톱워치</button>
+    <button class="tab-btn" data-tab="worldTab">세계시간</button>
+  </nav>
+
+  <section id="timerTab" class="tab-panel active">
+    <div class="keypad-card">
+      <div id="keypadDisplay" class="keypad-display">
+        00<small>시간</small> 00<small>분</small> 00<small>초</small>
+      </div>
+
+      <div class="keypad-grid">
+        <button class="key-btn" data-key="1">1</button>
+        <button class="key-btn" data-key="2">2</button>
+        <button class="key-btn" data-key="3">3</button>
+        <button class="key-btn" data-key="4">4</button>
+        <button class="key-btn" data-key="5">5</button>
+        <button class="key-btn" data-key="6">6</button>
+        <button class="key-btn" data-key="7">7</button>
+        <button class="key-btn" data-key="8">8</button>
+        <button class="key-btn" data-key="9">9</button>
+        <button class="key-btn action" id="keyClear">C</button>
+        <button class="key-btn" data-key="0">0</button>
+        <button class="key-btn action" id="keyBack">⌫</button>
+      </div>
+
+      <div class="creator-row">
+        <input type="text" id="inLabel" class="label-input" placeholder="라벨 (예: 라면, 집중, 스트레칭)" />
+        <button id="addStartBtn" class="btn-primary" disabled>▶ 시작</button>
+      </div>
+
+      <div class="presets">
+        <button class="btn-preset" data-sec="60" data-name="1분 타이머">1분</button>
+        <button class="btn-preset" data-sec="180" data-name="라면 3분">🍜 3분</button>
+        <button class="btn-preset" data-sec="300" data-name="5분 휴식">☕ 5분</button>
+        <button class="btn-preset" data-sec="600" data-name="10분 타이머">10분</button>
+        <button class="btn-preset" data-sec="1500" data-name="뽀모도로 25분">🍅 25분</button>
+      </div>
+    </div>
+
+    <div id="timersGrid" class="timers-grid"></div>
+  </section>
+
+  <section id="stopwatchTab" class="tab-panel">
+    <div class="sw-card">
+      <div id="swCircle" class="sw-circle">
+        <div id="swMain" class="sw-time">00:00</div>
+        <div id="swMs" class="sw-ms">.00</div>
+      </div>
+
+      <div class="sw-controls">
+        <button id="swStartBtn" class="btn-primary">시작</button>
+        <button id="swLapBtn" class="btn-secondary" disabled>구간 기록</button>
+        <button id="swResetBtn" class="btn-secondary">초기화</button>
+      </div>
+
+      <div id="lapList" class="lap-list"></div>
+    </div>
+  </section>
+
+  <section id="worldTab" class="tab-panel">
+    <div class="wc-hero">
+      <div id="wcLocalTime" class="wc-local-time">00:00:00</div>
+      <div id="wcLocalDate" class="wc-local-date">현재 위치 기준</div>
+    </div>
+
+    <div class="wc-add-bar">
+      <select id="citySelect" class="wc-select">
+        <option value="America/New_York|뉴욕 (미국)">뉴욕 (미국)</option>
+        <option value="America/Los_Angeles|로스앤젤레스 (미국)">로스앤젤레스 (미국)</option>
+        <option value="Europe/London|런던 (영국)">런던 (영국)</option>
+        <option value="Europe/Paris|파리 (프랑스)">파리 (프랑스)</option>
+        <option value="Europe/Berlin|베를린 (독일)">베를린 (독일)</option>
+        <option value="Asia/Tokyo|도쿄 (일본)">도쿄 (일본)</option>
+        <option value="Asia/Shanghai|상하이 (중국)">상하이 (중국)</option>
+        <option value="Asia/Singapore|싱가포르">싱가포르</option>
+        <option value="Australia/Sydney|시드니 (호주)">시드니 (호주)</option>
+      </select>
+      <button id="addCityBtn" class="btn-primary">+ 도시 추가</button>
+    </div>
+
+    <div id="wcList" class="wc-list"></div>
+  </section>
+
+  <script>
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("./sw.js").catch(() => {});
+    }
+
+    document.querySelectorAll(".tab-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".tab-btn").forEach((b) => b.classList.remove("active"));
+        document.querySelectorAll(".tab-panel").forEach((p) => p.classList.remove("active"));
+        btn.classList.add("active");
+        document.getElementById(btn.dataset.tab).classList.add("active");
+      });
+    });
+
+    let audioCtx = null;
+    let alarmInterval = null;
+    let wakeLock = null;
+
+    function unlockAudio() {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === "suspended") audioCtx.resume();
+    }
+
+    function playBeepPattern() {
+      unlockAudio();
+      const now = audioCtx.currentTime;
+      [0, 0.14, 0.28, 0.42].forEach((offset) => {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(880, now + offset);
+        gain.gain.setValueAtTime(0.001, now + offset);
+        gain.gain.exponentialRampToValueAtTime(0.28, now + offset + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + offset + 0.11);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(now + offset);
+        osc.stop(now + offset + 0.12);
+      });
+    }
+
+    async function syncWakeLock() {
+      const hasRunning = timers.some((t) => t.status === "running") || swRunning;
+      const badge = document.getElementById("wakeBadge");
+      if (!("wakeLock" in navigator)) {
+        badge.textContent = "화면 유지: 미지원";
+        return;
+      }
+      if (hasRunning && !wakeLock) {
+        try {
+          wakeLock = await navigator.wakeLock.request("screen");
+          badge.textContent = "화면 유지: ON";
+          badge.classList.add("active");
+          wakeLock.addEventListener("release", () => {
+            wakeLock = null;
+            badge.textContent = "화면 유지: 대기";
+            badge.classList.remove("active");
+          });
+        } catch (e) {}
+      } else if (!hasRunning && wakeLock) {
+        await wakeLock.release();
+        wakeLock = null;
+        badge.textContent = "화면 유지: 대기";
+        badge.classList.remove("active");
+      }
+    }
+
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "visible") syncWakeLock();
+    });
+
+    const notifBtn = document.getElementById("notifBtn");
+    function updateNotifButton() {
+      if (!("Notification" in window)) return (notifBtn.style.display = "none");
+      if (Notification.permission === "granted") {
+        notifBtn.textContent = "🔔 알림 켜짐";
+        notifBtn.disabled = true;
+      } else if (Notification.permission === "denied") {
+        notifBtn.textContent = "🔕 알림 차단됨";
+      }
+    }
+    notifBtn.addEventListener("click", async () => {
+      if ("Notification" in window) {
+        await Notification.requestPermission();
+        updateNotifButton();
+      }
+    });
+
+    function sendNotification(title) {
+      if ("Notification" in window && Notification.permission === "granted") {
+        new Notification("⏱️ 타이머 종료!", { body: `${title} 시간이 완료되었습니다.`, silent: true });
+      }
+    }
+
+    const TIMER_KEY = "pwa_clock_timers_v2";
+    const CIRCUMFERENCE = 2 * Math.PI * 88;
+    let timers = [];
+    let digitBuffer = "";
+
+    function updateKeypadDisplay() {
+      const padded = digitBuffer.padStart(6, "0");
+      const hh = padded.slice(0, 2);
+      const mm = padded.slice(2, 4);
+      const ss = padded.slice(4, 6);
+      const disp = document.getElementById("keypadDisplay");
+      disp.innerHTML = `${hh}<small>시간</small> ${mm}<small>분</small> ${ss}<small>초</small>`;
+      disp.classList.toggle("has-value", digitBuffer.length > 0);
+      document.getElementById("addStartBtn").disabled = digitBuffer.length === 0;
+    }
+
+    function getBufferSeconds() {
+      const padded = digitBuffer.padStart(6, "0");
+      const h = parseInt(padded.slice(0, 2), 10);
+      const m = parseInt(padded.slice(2, 4), 10);
+      const s = parseInt(padded.slice(4, 6), 10);
+      return h * 3600 + m * 60 + s;
+    }
+
+    document.querySelectorAll(".key-btn[data-key]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const d = btn.dataset.key;
+        if (digitBuffer.length === 0 && d === "0") return;
+        if (digitBuffer.length < 6) {
+          digitBuffer += d;
+          updateKeypadDisplay();
+        }
+      });
+    });
+
+    document.getElementById("keyBack").addEventListener("click", () => {
+      digitBuffer = digitBuffer.slice(0, -1);
+      updateKeypadDisplay();
+    });
+
+    document.getElementById("keyClear").addEventListener("click", () => {
+      digitBuffer = "";
+      updateKeypadDisplay();
+    });
+
+    document.addEventListener("keydown", (e) => {
+      if (document.activeElement.tagName === "INPUT") return;
+      if (!document.getElementById("timerTab").classList.contains("active")) return;
+      if (/^[0-9]$/.test(e.key)) {
+        if (digitBuffer.length === 0 && e.key === "0") return;
+        if (digitBuffer.length < 6) {
+          digitBuffer += e.key;
+          updateKeypadDisplay();
+        }
+      } else if (e.key === "Backspace") {
+        digitBuffer = digitBuffer.slice(0, -1);
+        updateKeypadDisplay();
+      } else if (e.key === "Enter" && digitBuffer.length > 0) {
+        document.getElementById("addStartBtn").click();
+      }
+    });
+
+    function saveTimers() {
+      localStorage.setItem(TIMER_KEY, JSON.stringify(timers));
+    }
+
+    function loadTimers() {
+      try {
+        const raw = localStorage.getItem(TIMER_KEY);
+        if (raw) timers = JSON.parse(raw);
+      } catch (e) { timers = []; }
+    }
+
+    function formatTime(ms) {
+      const totalSec = Math.max(0, Math.ceil(ms / 1000));
+      const h = Math.floor(totalSec / 3600);
+      const m = Math.floor((totalSec % 3600) / 60);
+      const s = totalSec % 60;
+      const pad = (n) => String(n).padStart(2, "0");
+      return h > 0 ? `${h}:${pad(m)}:${pad(s)}` : `${pad(m)}:${pad(s)}`;
+    }
+
+    function addTimer(totalSeconds, label) {
+      if (totalSeconds <= 0) return;
+      unlockAudio();
+      const totalMs = totalSeconds * 1000;
+      const now = Date.now();
+      timers.unshift({
+        id: String(now + Math.random()),
+        label: label.trim() || `${formatTime(totalMs)} 타이머`,
+        totalMs,
+        remainingMs: totalMs,
+        endTime: now + totalMs,
+        status: "running"
+      });
+      saveTimers();
+      renderTimers();
+      syncWakeLock();
+    }
+
+    function toggleTimer(id) {
+      unlockAudio();
+      const t = timers.find((item) => item.id === id);
+      if (!t) return;
+      const now = Date.now();
+      if (t.status === "running") {
+        t.remainingMs = Math.max(0, t.endTime - now);
+        t.status = "paused";
+      } else if (t.status === "paused") {
+        t.endTime = now + t.remainingMs;
+        t.status = "running";
+      } else if (t.status === "ringing") {
+        t.remainingMs = t.totalMs;
+        t.status = "paused";
+      }
+      saveTimers();
+      renderTimers();
+      syncWakeLock();
+      syncAlarmLoop();
+    }
+
+    function resetTimer(id) {
+      const t = timers.find((item) => item.id === id);
+      if (!t) return;
+      t.remainingMs = t.totalMs;
+      t.status = "paused";
+      saveTimers();
+      renderTimers();
+      syncWakeLock();
+      syncAlarmLoop();
+    }
+
+    function addOneMinute(id) {
+      unlockAudio();
+      const t = timers.find((item) => item.id === id);
+      if (!t) return;
+      const extra = 60000;
+      t.totalMs += extra;
+      if (t.status === "running") t.endTime += extra;
+      else if (t.status === "ringing") {
+        t.endTime = Date.now() + extra;
+        t.remainingMs = extra;
+        t.status = "running";
+      } else t.remainingMs += extra;
+      saveTimers();
+      renderTimers();
+      syncWakeLock();
+      syncAlarmLoop();
+    }
+
+    function deleteTimer(id) {
+      timers = timers.filter((item) => item.id !== id);
+      saveTimers();
+      renderTimers();
+      syncWakeLock();
+      syncAlarmLoop();
+    }
+
+    function syncAlarmLoop() {
+      const hasRinging = timers.some((t) => t.status === "ringing");
+      if (hasRinging && !alarmInterval) {
+        playBeepPattern();
+        alarmInterval = setInterval(playBeepPattern, 1200);
+        if ("vibrate" in navigator) navigator.vibrate([300, 150, 300]);
+      } else if (!hasRinging && alarmInterval) {
+        clearInterval(alarmInterval);
+        alarmInterval = null;
+      }
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/[&<>"']/g, (m) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[m]));
+    }
+
+    function renderTimers() {
+      const grid = document.getElementById("timersGrid");
+      grid.innerHTML = timers.map((t) => {
+        const isRinging = t.status === "ringing";
+        const isRunning = t.status === "running";
+        const endClock = new Date(t.endTime).toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" });
+        return `
+          <article class="timer-card ${isRinging ? "ringing" : ""}" data-id="${t.id}">
+            <div class="card-top">
+              <span class="timer-title">${escapeHtml(t.label)}</span>
+              <button class="btn-delete" onclick="deleteTimer('${t.id}')">✕</button>
+            </div>
+            <div class="ring-wrapper">
+              <svg viewBox="0 0 196 196">
+                <circle class="ring-bg" cx="98" cy="98" r="88"></circle>
+                <circle class="ring-progress" cx="98" cy="98" r="88"
+                  stroke-dasharray="${CIRCUMFERENCE}" stroke-dashoffset="0"></circle>
+              </svg>
+              <div class="time-display">
+                <div class="time-main">${formatTime(t.remainingMs)}</div>
+                <div class="time-sub">${isRunning ? `🔔 ${endClock} 종료` : (isRinging ? "시간 종료!" : "일시정지")}</div>
+              </div>
+            </div>
+            <div class="card-controls">
+              <button class="${isRinging ? "btn-stop-alarm" : "btn-primary"}" onclick="toggleTimer('${t.id}')">
+                ${isRinging ? "중지" : (isRunning ? "일시정지" : "계속")}
+              </button>
+              <button class="btn-secondary" onclick="addOneMinute('${t.id}')">+1분</button>
+              <button class="btn-secondary" onclick="resetTimer('${t.id}')">초기화</button>
+            </div>
+          </article>
+        `;
+      }).join("");
+      tickTimers();
+    }
+
+    function tickTimers() {
+      const now = Date.now();
+      let changed = false;
+      let nearestMs = Infinity;
+
+      timers.forEach((t) => {
+        if (t.status === "running") {
+          const rem = t.endTime - now;
+          if (rem <= 0) {
+            t.remainingMs = 0;
+            t.status = "ringing";
+            changed = true;
+            sendNotification(t.label);
+          } else {
+            t.remainingMs = rem;
+            if (rem < nearestMs) nearestMs = rem;
+          }
+        }
+        const card = document.querySelector(`.timer-card[data-id="${t.id}"]`);
+        if (card) {
+          card.querySelector(".time-main").textContent = formatTime(t.remainingMs);
+          const ratio = Math.max(0, Math.min(1, t.remainingMs / t.totalMs));
+          card.querySelector(".ring-progress").style.strokeDashoffset = CIRCUMFERENCE * (1 - ratio);
+        }
+      });
+
+      if (timers.some((t) => t.status === "ringing")) document.title = "🔔 시간 종료! - 웹 시계";
+      else if (nearestMs < Infinity) document.title = `${formatTime(nearestMs)} - 웹 시계`;
+      else document.title = "웹 시계";
+
+      if (changed) {
+        saveTimers();
+        renderTimers();
+        syncWakeLock();
+        syncAlarmLoop();
+      }
+    }
+
+    document.getElementById("addStartBtn").addEventListener("click", () => {
+      const sec = getBufferSeconds();
+      if (sec > 0) {
+        addTimer(sec, document.getElementById("inLabel").value);
+        digitBuffer = "";
+        document.getElementById("inLabel").value = "";
+        updateKeypadDisplay();
+      }
+    });
+
+    document.querySelectorAll(".btn-preset").forEach((btn) => {
+      btn.addEventListener("click", () => addTimer(parseInt(btn.dataset.sec, 10), btn.dataset.name));
+    });
+
+    let swRunning = false;
+    let swStartTime = 0;
+    let swElapsed = 0;
+    let laps = [];
+
+    function formatSw(ms) {
+      const totalSec = Math.floor(ms / 1000);
+      const h = Math.floor(totalSec / 3600);
+      const m = Math.floor((totalSec % 3600) / 60);
+      const s = totalSec % 60;
+      const cs = Math.floor((ms % 1000) / 10);
+      const pad = (n) => String(n).padStart(2, "0");
+      return {
+        main: h > 0 ? `${h}:${pad(m)}:${pad(s)}` : `${pad(m)}:${pad(s)}`,
+        ms: `.${pad(cs)}`
+      };
+    }
+
+    function updateSwDisplay() {
+      const current = swRunning ? swElapsed + (Date.now() - swStartTime) : swElapsed;
+      const f = formatSw(current);
+      document.getElementById("swMain").textContent = f.main;
+      document.getElementById("swMs").textContent = f.ms;
+    }
+
+    function renderLaps() {
+      const list = document.getElementById("lapList");
+      if (laps.length === 0) {
+        list.innerHTML = "";
+        return;
+      }
+      const diffs = laps.map((l) => l.diff);
+      const minDiff = laps.length >= 2 ? Math.min(...diffs) : -1;
+      const maxDiff = laps.length >= 2 ? Math.max(...diffs) : -1;
+
+      list.innerHTML = laps.map((l, idx) => {
+        const lapNo = laps.length - idx;
+        const fDiff = formatSw(l.diff);
+        const fTotal = formatSw(l.total);
+        let tag = "";
+        if (l.diff === minDiff) tag = `<span class="lap-tag-fast">최고</span>`;
+        else if (l.diff === maxDiff) tag = `<span class="lap-tag-slow">최저</span>`;
+        return `
+          <div class="lap-item">
+            <span>구간 ${String(lapNo).padStart(2, "0")}${tag}</span>
+            <span>+${fDiff.main}${fDiff.ms}</span>
+            <span style="color:var(--text-muted)">${fTotal.main}${fTotal.ms}</span>
+          </div>
+        `;
+      }).join("");
+    }
+
+    document.getElementById("swStartBtn").addEventListener("click", () => {
+      const btn = document.getElementById("swStartBtn");
+      const lapBtn = document.getElementById("swLapBtn");
+      const circle = document.getElementById("swCircle");
+      if (!swRunning) {
+        swRunning = true;
+        swStartTime = Date.now();
+        btn.textContent = "일시정지";
+        lapBtn.disabled = false;
+        circle.classList.add("running");
+      } else {
+        swElapsed += Date.now() - swStartTime;
+        swRunning = false;
+        btn.textContent = "계속";
+        lapBtn.disabled = true;
+        circle.classList.remove("running");
+      }
+      syncWakeLock();
+    });
+
+    document.getElementById("swLapBtn").addEventListener("click", () => {
+      if (!swRunning) return;
+      const total = swElapsed + (Date.now() - swStartTime);
+      const prevTotal = laps.length > 0 ? laps[0].total : 0;
+      laps.unshift({ total, diff: total - prevTotal });
+      renderLaps();
+    });
+
+    document.getElementById("swResetBtn").addEventListener("click", () => {
+      swRunning = false;
+      swElapsed = 0;
+      laps = [];
+      document.getElementById("swStartBtn").textContent = "시작";
+      document.getElementById("swLapBtn").disabled = true;
+      document.getElementById("swCircle").classList.remove("running");
+      updateSwDisplay();
+      renderLaps();
+      syncWakeLock();
+    });
+
+    const WC_KEY = "pwa_world_cities_v1";
+    let savedCities = JSON.parse(localStorage.getItem(WC_KEY) || "null") || [
+      { tz: "America/New_York", name: "뉴욕 (미국)" },
+      { tz: "Europe/London", name: "런던 (영국)" },
+      { tz: "Asia/Tokyo", name: "도쿄 (일본)" }
+    ];
+
+    function saveCities() {
+      localStorage.setItem(WC_KEY, JSON.stringify(savedCities));
+    }
+
+    function getHourDiffText(tz) {
+      const now = new Date();
+      const localHour = parseInt(new Intl.DateTimeFormat("en-GB", { hour: "2-digit", hour12: false }).format(now), 10);
+      const targetHour = parseInt(new Intl.DateTimeFormat("en-GB", { timeZone: tz, hour: "2-digit", hour12: false }).format(now), 10);
+      const localDay = new Intl.DateTimeFormat("en-CA").format(now);
+      const targetDay = new Intl.DateTimeFormat("en-CA", { timeZone: tz }).format(now);
+      let diff = targetHour - localHour;
+      if (targetDay > localDay) diff += 24;
+      else if (targetDay < localDay) diff -= 24;
+      const dayLabel = targetDay > localDay ? "내일" : (targetDay < localDay ? "어제" : "오늘");
+      return `${dayLabel} · 한국보다 ${diff === 0 ? "시차 없음" : (diff > 0 ? `+${diff}시간` : `${diff}시간`)}`;
+    }
+
+    function renderWorldClocks() {
+      const now = new Date();
+      document.getElementById("wcLocalTime").textContent = now.toLocaleTimeString("ko-KR", { hour12: false });
+      document.getElementById("wcLocalDate").textContent = now.toLocaleDateString("ko-KR", {
+        year: "numeric", month: "long", day: "numeric", weekday: "long"
+      });
+
+      const list = document.getElementById("wcList");
+      list.innerHTML = savedCities.map((c, idx) => {
+        const timeStr = now.toLocaleTimeString("ko-KR", { timeZone: c.tz, hour: "2-digit", minute: "2-digit", hour12: false });
+        return `
+          <div class="wc-item">
+            <div>
+              <div class="wc-city">${escapeHtml(c.name)}</div>
+              <div class="wc-diff">${getHourDiffText(c.tz)}</div>
+            </div>
+            <div class="wc-right">
+              <div class="wc-clock">${timeStr}</div>
+              <button class="btn-delete" onclick="removeCity(${idx})">✕</button>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function removeCity(idx) {
+      savedCities.splice(idx, 1);
+      saveCities();
+      renderWorldClocks();
+    }
+
+    document.getElementById("addCityBtn").addEventListener("click", () => {
+      const val = document.getElementById("citySelect").value;
+      const [tz, name] = val.split("|");
+      if (!savedCities.some((c) => c.tz === tz)) {
+        savedCities.push({ tz, name });
+        saveCities();
+        renderWorldClocks();
+      }
+    });
+
+    loadTimers();
+    updateNotifButton();
+    renderTimers();
+    renderWorldClocks();
+    syncWakeLock();
+    syncAlarmLoop();
+
+    setInterval(() => {
+      tickTimers();
+      if (swRunning) updateSwDisplay();
+    }, 50);
+
+    setInterval(renderWorldClocks, 1000);
+  </script>
+</body>
+</html>
