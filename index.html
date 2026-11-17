@@ -3,24 +3,44 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <meta name="theme-color" content="#202124" />
-  <title>시계 - 타이머 · 스톱워치 · 세계시간</title>
+  <meta name="theme-color" content="#202124" id="metaThemeColor" />
+  <title>웹 시계 - 타이머 · 스톱워치 · 세계시간</title>
   <link rel="manifest" href="manifest.json" />
   <link rel="icon" type="image/svg+xml" href="icon.svg" />
   <link rel="apple-touch-icon" href="icon.svg" />
   <style>
     :root {
-      --bg: #202124;
-      --surface: #292a2d;
-      --surface-hover: #35363a;
-      --border: #3c4043;
-      --text: #e8eaed;
+      --bg: #18191c;
+      --surface: #24262b;
+      --surface-elevated: #2e3138;
+      --surface-hover: #383b44;
+      --border: #3a3d46;
+      --text: #f1f3f4;
       --text-muted: #9aa0a6;
       --accent: #8ab4f8;
-      --accent-bg: rgba(138, 180, 248, 0.14);
+      --accent-contrast: #18191c;
+      --accent-bg: rgba(138, 180, 248, 0.15);
       --danger: #f28b82;
       --success: #81c995;
-      --ring-bg: #3c4043;
+      --ring-bg: #353841;
+      --shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
+    }
+
+    body.light-mode {
+      --bg: #f4f6f9;
+      --surface: #ffffff;
+      --surface-elevated: #f8f9fa;
+      --surface-hover: #e8eaed;
+      --border: #dadce0;
+      --text: #202124;
+      --text-muted: #5f6368;
+      --accent: #1a73e8;
+      --accent-contrast: #ffffff;
+      --accent-bg: rgba(26, 115, 232, 0.12);
+      --danger: #d93025;
+      --success: #188038;
+      --ring-bg: #e1e5ea;
+      --shadow: 0 8px 24px rgba(32, 33, 36, 0.08);
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -33,21 +53,23 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 16px 16px 84px;
+      padding: 14px 16px 80px;
+      transition: background-color 0.25s, color 0.25s;
     }
 
+    /* 상단 헤더 */
     header {
       width: 100%;
       max-width: 720px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 16px;
+      margin-bottom: 14px;
     }
 
     header h1 {
-      font-size: 1.2rem;
-      font-weight: 500;
+      font-size: 1.15rem;
+      font-weight: 600;
       display: flex;
       align-items: center;
       gap: 8px;
@@ -55,13 +77,13 @@
 
     .header-actions {
       display: flex;
-      gap: 8px;
+      gap: 6px;
       align-items: center;
     }
 
     .badge {
-      font-size: 0.75rem;
-      padding: 4px 10px;
+      font-size: 0.72rem;
+      padding: 5px 10px;
       border-radius: 999px;
       background: var(--surface);
       color: var(--text-muted);
@@ -71,8 +93,23 @@
     .badge.active {
       color: var(--accent);
       border-color: var(--accent);
+      font-weight: 600;
     }
 
+    .icon-btn {
+      background: var(--surface);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 5px 11px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.1s;
+    }
+    .icon-btn:hover { background: var(--surface-hover); }
+    .icon-btn:active { transform: scale(0.95); }
+
+    /* 탭 네비게이션 */
     .nav-tabs {
       width: 100%;
       max-width: 720px;
@@ -82,7 +119,7 @@
       border: 1px solid var(--border);
       border-radius: 14px;
       padding: 4px;
-      margin-bottom: 20px;
+      margin-bottom: 18px;
     }
 
     .tab-btn {
@@ -90,8 +127,8 @@
       color: var(--text-muted);
       border: none;
       border-radius: 10px;
-      padding: 10px 8px;
-      font-size: 0.92rem;
+      padding: 9px 8px;
+      font-size: 0.9rem;
       font-weight: 500;
       cursor: pointer;
       transition: all 0.15s;
@@ -100,6 +137,7 @@
     .tab-btn.active {
       background: var(--accent-bg);
       color: var(--accent);
+      font-weight: 600;
     }
 
     .tab-panel {
@@ -109,89 +147,310 @@
       flex-direction: column;
       align-items: center;
     }
-
-    .tab-panel.active {
-      display: flex;
-    }
+    .tab-panel.active { display: flex; }
 
     button {
       cursor: pointer;
       border: none;
       border-radius: 999px;
-      font-size: 0.9rem;
+      font-size: 0.88rem;
       font-weight: 500;
       padding: 10px 18px;
-      transition: background 0.15s, transform 0.05s;
+      transition: background 0.15s, transform 0.08s;
     }
-    button:active { transform: scale(0.97); }
+    button:active { transform: scale(0.96); }
 
-    .btn-primary { background: var(--accent); color: #202124; }
-    .btn-primary:hover { background: #aecbfa; }
-    .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+    .btn-primary { background: var(--accent); color: var(--accent-contrast); font-weight: 600; }
+    .btn-primary:hover { filter: brightness(1.06); }
+    .btn-primary:disabled { opacity: 0.38; cursor: not-allowed; }
     .btn-secondary { background: var(--surface-hover); color: var(--text); }
-    .btn-secondary:hover { background: #414347; }
+    .btn-secondary:hover { filter: brightness(1.05); }
 
-    .keypad-card {
+    /* ================= 1. 메인 히어로 타이머 (집중 배치) ================= */
+    .hero-timer-section {
+      width: 100%;
+      margin-bottom: 18px;
+    }
+
+    .hero-card {
       width: 100%;
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 20px;
-      padding: 20px;
-      margin-bottom: 20px;
+      border-radius: 26px;
+      padding: 22px 20px 24px;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      transition: border-color 0.25s, transform 0.2s;
+    }
+
+    .hero-card.ringing {
+      border-color: var(--danger);
+      border-width: 2px;
+      animation: ringShake 0.45s infinite alternate;
+    }
+
+    @keyframes ringShake {
+      0% { transform: rotate(-0.6deg); }
+      100% { transform: rotate(0.6deg); }
+    }
+
+    .hero-header {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 4px;
+    }
+
+    .hero-badge {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--accent);
+      background: var(--accent-bg);
+      padding: 4px 10px;
+      border-radius: 999px;
+    }
+
+    .hero-title {
+      font-size: 1.15rem;
+      font-weight: 600;
+      margin-top: 6px;
+    }
+
+    /* 두꺼운 도넛 그래프 (메인) */
+    .donut-hero-wrap {
+      position: relative;
+      width: 268px;
+      height: 268px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 10px 0 18px;
+    }
+
+    .donut-hero-wrap svg {
+      transform: rotate(-90deg);
+      width: 268px;
+      height: 268px;
+    }
+
+    .donut-bg {
+      fill: none;
+      stroke: var(--ring-bg);
+      stroke-width: 18;
+    }
+
+    .donut-progress {
+      fill: none;
+      stroke: var(--accent);
+      stroke-width: 18;
+      stroke-linecap: round;
+      transition: stroke-dashoffset 0.1s linear, stroke 0.2s;
+    }
+
+    .hero-card.ringing .donut-progress {
+      stroke: var(--danger);
+    }
+
+    .donut-center {
+      position: absolute;
+      text-align: center;
       display: flex;
       flex-direction: column;
       align-items: center;
     }
 
-    .keypad-display {
-      font-size: 2.6rem;
-      font-weight: 400;
-      letter-spacing: 2px;
+    .hero-time-main {
+      font-size: 3.1rem;
+      font-weight: 600;
       font-variant-numeric: tabular-nums;
-      margin: 6px 0 16px;
+      letter-spacing: -0.5px;
+      line-height: 1.1;
+    }
+
+    .hero-time-sub {
+      font-size: 0.85rem;
       color: var(--text-muted);
+      margin-top: 6px;
+      font-weight: 500;
     }
 
-    .keypad-display.has-value {
-      color: var(--accent);
-    }
-
-    .keypad-display small {
+    .hero-card.ringing .hero-time-sub {
+      color: var(--danger);
       font-size: 1.05rem;
-      margin-right: 10px;
+      font-weight: 700;
+    }
+
+    .hero-controls {
+      display: flex;
+      gap: 10px;
+      width: 100%;
+      max-width: 380px;
+      justify-content: center;
+    }
+
+    .hero-controls button {
+      flex: 1;
+      padding: 12px 16px;
+      font-size: 0.95rem;
+    }
+
+    .btn-stop-alarm {
+      background: var(--danger) !important;
+      color: #ffffff !important;
+      font-weight: 700 !important;
+    }
+
+    /* ================= 2. 콤팩트 & 재미있는 세팅 바 ================= */
+    .quick-dock {
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 14px 16px;
+      margin-bottom: 18px;
+    }
+
+    .dock-top-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .chip-scroll {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      flex: 1;
+    }
+
+    .fun-chip {
+      background: var(--surface-elevated);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 7px 13px;
+      font-size: 0.83rem;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: transform 0.12s, border-color 0.15s, background 0.15s;
+    }
+
+    .fun-chip:hover {
+      border-color: var(--accent);
+      background: var(--accent-bg);
+      transform: translateY(-2px);
+    }
+
+    .fun-chip:active {
+      transform: scale(0.93);
+    }
+
+    .btn-toggle-pad {
+      background: var(--accent-bg);
+      color: var(--accent);
+      border: 1px solid transparent;
+      padding: 7px 14px;
+      font-size: 0.83rem;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .btn-toggle-pad.open {
+      border-color: var(--accent);
+    }
+
+    /* 접이식 콤팩트 키패드 드로어 */
+    .pad-drawer {
+      display: none;
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 1px dashed var(--border);
+      flex-direction: column;
+      align-items: center;
+      animation: slideDown 0.2s ease-out;
+    }
+
+    .pad-drawer.open {
+      display: flex;
+    }
+
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .pad-top-bar {
+      width: 100%;
+      max-width: 340px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 8px 14px;
+      margin-bottom: 10px;
+    }
+
+    .keypad-display {
+      font-size: 1.55rem;
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
       color: var(--text-muted);
+    }
+
+    .keypad-display.has-value { color: var(--accent); }
+    .keypad-display small { font-size: 0.8rem; margin-right: 6px; color: var(--text-muted); font-weight: 400; }
+
+    .mini-nudge {
+      display: flex;
+      gap: 4px;
+    }
+
+    .nudge-btn {
+      background: var(--surface-elevated);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 4px 8px;
+      font-size: 0.75rem;
     }
 
     .keypad-grid {
       display: grid;
-      grid-template-columns: repeat(3, 76px);
-      gap: 10px;
-      margin-bottom: 16px;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 6px;
+      width: 100%;
+      max-width: 340px;
+      margin-bottom: 10px;
     }
 
     .key-btn {
-      width: 76px;
-      height: 54px;
-      border-radius: 28px;
+      height: 40px;
+      border-radius: 10px;
       background: var(--bg);
       color: var(--text);
-      font-size: 1.35rem;
-      font-weight: 400;
+      font-size: 1.05rem;
+      font-weight: 500;
       border: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      padding: 0;
     }
-
     .key-btn:hover { background: var(--surface-hover); }
-    .key-btn.action { font-size: 1.05rem; color: var(--text-muted); }
+    .key-btn.action { font-size: 0.88rem; color: var(--text-muted); }
 
     .creator-row {
       width: 100%;
-      max-width: 420px;
+      max-width: 340px;
       display: flex;
       gap: 8px;
-      margin-bottom: 14px;
     }
 
     .label-input {
@@ -199,135 +458,114 @@
       background: var(--bg);
       border: 1px solid var(--border);
       border-radius: 12px;
-      padding: 10px 14px;
+      padding: 8px 12px;
       color: var(--text);
-      font-size: 0.92rem;
+      font-size: 0.86rem;
       outline: none;
     }
     .label-input:focus { border-color: var(--accent); }
 
-    .presets {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 6px;
-      width: 100%;
-      padding-top: 12px;
-      border-top: 1px solid var(--border);
-    }
-
-    .btn-preset {
-      background: var(--bg);
-      color: var(--text-muted);
-      border: 1px solid var(--border);
-      padding: 6px 12px;
-      font-size: 0.8rem;
-    }
-    .btn-preset:hover { color: var(--text); border-color: var(--accent); }
-
-    .timers-grid {
+    /* 보조 타이머 그리드 */
+    .sub-timers-grid {
       width: 100%;
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
-      gap: 16px;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 12px;
     }
 
-    .timer-card {
+    .sub-card {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 20px;
-      padding: 18px;
+      border-radius: 18px;
+      padding: 14px;
       display: flex;
       flex-direction: column;
       align-items: center;
+      cursor: pointer;
+      transition: border-color 0.15s;
     }
 
-    .timer-card.ringing {
-      border-color: var(--danger);
-      animation: pulse 0.9s infinite alternate;
-    }
+    .sub-card:hover { border-color: var(--accent); }
+    .sub-card.ringing { border-color: var(--danger); border-width: 2px; }
 
-    @keyframes pulse {
-      from { background: var(--surface); }
-      to { background: #3c2626; }
-    }
-
-    .card-top {
+    .sub-top {
       width: 100%;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 8px;
+      font-size: 0.88rem;
+      font-weight: 600;
     }
-
-    .timer-title { font-size: 1rem; font-weight: 500; }
 
     .btn-delete {
       background: transparent;
       color: var(--text-muted);
-      padding: 4px 8px;
-      font-size: 1.05rem;
+      padding: 2px 6px;
+      font-size: 0.95rem;
     }
     .btn-delete:hover { color: var(--danger); }
 
-    .ring-wrapper {
+    .donut-sub-wrap {
       position: relative;
-      width: 196px;
-      height: 196px;
+      width: 112px;
+      height: 112px;
       display: flex;
       align-items: center;
       justify-content: center;
-      margin: 6px 0 16px;
+      margin: 8px 0 10px;
     }
 
-    .ring-wrapper svg {
+    .donut-sub-wrap svg {
       transform: rotate(-90deg);
-      width: 196px;
-      height: 196px;
+      width: 112px;
+      height: 112px;
     }
 
-    .ring-bg { fill: none; stroke: var(--ring-bg); stroke-width: 7; }
-    .ring-progress {
+    .donut-sub-bg { fill: none; stroke: var(--ring-bg); stroke-width: 10; }
+    .donut-sub-progress {
       fill: none;
       stroke: var(--accent);
-      stroke-width: 7;
+      stroke-width: 10;
       stroke-linecap: round;
-      transition: stroke-dashoffset 0.1s linear;
     }
-    .timer-card.ringing .ring-progress { stroke: var(--danger); }
+    .sub-card.ringing .donut-sub-progress { stroke: var(--danger); }
 
-    .time-display { position: absolute; text-align: center; }
-    .time-main {
-      font-size: 2.2rem;
+    .sub-time-main {
+      position: absolute;
+      font-size: 1.2rem;
+      font-weight: 600;
       font-variant-numeric: tabular-nums;
     }
-    .time-sub { font-size: 0.78rem; color: var(--text-muted); margin-top: 4px; }
 
-    .card-controls {
+    .sub-controls {
       display: flex;
-      gap: 8px;
+      gap: 6px;
       width: 100%;
-      justify-content: center;
     }
-    .card-controls button { flex: 1; max-width: 105px; padding: 9px 10px; }
-    .btn-stop-alarm { background: var(--danger) !important; color: #202124 !important; font-weight: 600; }
+    .sub-controls button {
+      flex: 1;
+      padding: 6px 8px;
+      font-size: 0.78rem;
+    }
 
+    /* ================= 3. 스톱워치 UI ================= */
     .sw-card {
       width: 100%;
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 20px;
+      border-radius: 24px;
       padding: 28px 20px;
       display: flex;
       flex-direction: column;
       align-items: center;
+      box-shadow: var(--shadow);
     }
 
     .sw-circle {
-      width: 240px;
-      height: 240px;
+      width: 248px;
+      height: 248px;
       border-radius: 50%;
-      border: 6px solid var(--border);
+      border: 14px solid var(--ring-bg);
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -337,31 +575,16 @@
     }
 
     .sw-circle.running { border-color: var(--accent); }
+    .sw-time { font-size: 2.7rem; font-weight: 600; font-variant-numeric: tabular-nums; }
+    .sw-ms { font-size: 1.35rem; color: var(--accent); font-variant-numeric: tabular-nums; margin-top: 2px; font-weight: 600; }
 
-    .sw-time {
-      font-size: 2.6rem;
-      font-variant-numeric: tabular-nums;
-    }
-
-    .sw-ms {
-      font-size: 1.35rem;
-      color: var(--accent);
-      font-variant-numeric: tabular-nums;
-      margin-top: 2px;
-    }
-
-    .sw-controls {
-      display: flex;
-      gap: 12px;
-      margin-bottom: 20px;
-    }
-
-    .sw-controls button { min-width: 110px; padding: 12px 20px; }
+    .sw-controls { display: flex; gap: 10px; margin-bottom: 18px; }
+    .sw-controls button { min-width: 104px; padding: 11px 18px; }
 
     .lap-list {
       width: 100%;
       max-width: 460px;
-      max-height: 260px;
+      max-height: 240px;
       overflow-y: auto;
       border-top: 1px solid var(--border);
     }
@@ -371,43 +594,35 @@
       justify-content: space-between;
       padding: 10px 12px;
       border-bottom: 1px solid var(--border);
-      font-size: 0.9rem;
+      font-size: 0.88rem;
       font-variant-numeric: tabular-nums;
     }
 
-    .lap-tag-fast { color: var(--success); font-size: 0.78rem; margin-left: 6px; }
-    .lap-tag-slow { color: var(--danger); font-size: 0.78rem; margin-left: 6px; }
+    .lap-tag-fast { color: var(--success); font-size: 0.76rem; font-weight: 600; margin-left: 6px; }
+    .lap-tag-slow { color: var(--danger); font-size: 0.76rem; font-weight: 600; margin-left: 6px; }
 
+    /* ================= 4. 세계시간 UI ================= */
     .wc-hero {
       width: 100%;
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 20px;
+      border-radius: 24px;
       padding: 24px 20px;
       text-align: center;
-      margin-bottom: 16px;
+      margin-bottom: 14px;
+      box-shadow: var(--shadow);
     }
 
     .wc-local-time {
       font-size: 3rem;
-      font-weight: 400;
+      font-weight: 600;
       font-variant-numeric: tabular-nums;
       color: var(--accent);
     }
 
-    .wc-local-date {
-      font-size: 0.95rem;
-      color: var(--text-muted);
-      margin-top: 6px;
-    }
+    .wc-local-date { font-size: 0.92rem; color: var(--text-muted); margin-top: 6px; }
 
-    .wc-add-bar {
-      width: 100%;
-      display: flex;
-      gap: 8px;
-      margin-bottom: 14px;
-    }
-
+    .wc-add-bar { width: 100%; display: flex; gap: 8px; margin-bottom: 12px; }
     .wc-select {
       flex: 1;
       background: var(--surface);
@@ -415,31 +630,24 @@
       border: 1px solid var(--border);
       border-radius: 12px;
       padding: 10px 14px;
-      font-size: 0.92rem;
+      font-size: 0.9rem;
       outline: none;
     }
 
-    .wc-list {
-      width: 100%;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
+    .wc-list { width: 100%; display: flex; flex-direction: column; gap: 10px; }
     .wc-item {
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: 16px;
-      padding: 16px 20px;
+      padding: 15px 18px;
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
-
-    .wc-city { font-size: 1.05rem; font-weight: 500; }
-    .wc-diff { font-size: 0.8rem; color: var(--text-muted); margin-top: 4px; }
-    .wc-right { display: flex; align-items: center; gap: 14px; }
-    .wc-clock { font-size: 1.65rem; font-variant-numeric: tabular-nums; }
+    .wc-city { font-size: 1rem; font-weight: 600; }
+    .wc-diff { font-size: 0.78rem; color: var(--text-muted); margin-top: 3px; }
+    .wc-right { display: flex; align-items: center; gap: 12px; }
+    .wc-clock { font-size: 1.6rem; font-weight: 600; font-variant-numeric: tabular-nums; }
   </style>
 </head>
 <body>
@@ -448,7 +656,8 @@
     <h1>⏱️ 웹 시계</h1>
     <div class="header-actions">
       <span id="wakeBadge" class="badge">화면 유지: 대기</span>
-      <button id="notifBtn" class="btn-secondary" style="padding: 6px 12px; font-size: 0.8rem;">알림 허용</button>
+      <button id="notifBtn" class="icon-btn">🔔 알림</button>
+      <button id="themeBtn" class="icon-btn" title="라이트/다크 모드 전환">☀️ 라이트</button>
     </div>
   </header>
 
@@ -458,67 +667,86 @@
     <button class="tab-btn" data-tab="worldTab">세계시간</button>
   </nav>
 
+  <!-- ================= 탭 1: 타이머 ================= -->
   <section id="timerTab" class="tab-panel active">
-    <div class="keypad-card">
-      <div id="keypadDisplay" class="keypad-display">
-        00<small>시간</small> 00<small>분</small> 00<small>초</small>
+    <!-- 1. 메인 집중 타이머 영역 -->
+    <div id="heroTimerSection" class="hero-timer-section"></div>
+
+    <!-- 2. 슬림 & 재미있는 세팅 바 -->
+    <div class="quick-dock">
+      <div class="dock-top-row">
+        <div class="chip-scroll">
+          <button class="fun-chip" data-sec="60" data-name="⚡ 1분 퀵">⚡ 1분</button>
+          <button class="fun-chip" data-sec="180" data-name="🍜 라면 3분">🍜 라면 3분</button>
+          <button class="fun-chip" data-sec="300" data-name="☕ 티타임 5분">☕ 5분</button>
+          <button class="fun-chip" data-sec="600" data-name="🧘 휴식 10분">🧘 10분</button>
+          <button class="fun-chip" data-sec="1500" data-name="🍅 뽀모도로 25분">🍅 25분</button>
+          <button class="fun-chip" id="randomDiceBtn" title="랜덤 휴식/집중 타이머">🎲 랜덤</button>
+        </div>
+        <button id="togglePadBtn" class="btn-toggle-pad">+ 직접 설정</button>
       </div>
 
-      <div class="keypad-grid">
-        <button class="key-btn" data-key="1">1</button>
-        <button class="key-btn" data-key="2">2</button>
-        <button class="key-btn" data-key="3">3</button>
-        <button class="key-btn" data-key="4">4</button>
-        <button class="key-btn" data-key="5">5</button>
-        <button class="key-btn" data-key="6">6</button>
-        <button class="key-btn" data-key="7">7</button>
-        <button class="key-btn" data-key="8">8</button>
-        <button class="key-btn" data-key="9">9</button>
-        <button class="key-btn action" id="keyClear">C</button>
-        <button class="key-btn" data-key="0">0</button>
-        <button class="key-btn action" id="keyBack">⌫</button>
-      </div>
+      <!-- 접이식 콤팩트 키패드 -->
+      <div id="padDrawer" class="pad-drawer">
+        <div class="pad-top-bar">
+          <div id="keypadDisplay" class="keypad-display">
+            00<small>시간</small> 00<small>분</small> 00<small>초</small>
+          </div>
+          <div class="mini-nudge">
+            <button class="nudge-btn" data-nudge="30">+30초</button>
+            <button class="nudge-btn" data-nudge="60">+1분</button>
+            <button class="nudge-btn" data-nudge="300">+5분</button>
+          </div>
+        </div>
 
-      <div class="creator-row">
-        <input type="text" id="inLabel" class="label-input" placeholder="라벨 (예: 라면, 집중, 스트레칭)" />
-        <button id="addStartBtn" class="btn-primary" disabled>▶ 시작</button>
-      </div>
+        <div class="keypad-grid">
+          <button class="key-btn" data-key="1">1</button>
+          <button class="key-btn" data-key="2">2</button>
+          <button class="key-btn" data-key="3">3</button>
+          <button class="key-btn" data-key="4">4</button>
+          <button class="key-btn" data-key="5">5</button>
+          <button class="key-btn action" id="keyBack">⌫</button>
+          <button class="key-btn" data-key="6">6</button>
+          <button class="key-btn" data-key="7">7</button>
+          <button class="key-btn" data-key="8">8</button>
+          <button class="key-btn" data-key="9">9</button>
+          <button class="key-btn" data-key="0">0</button>
+          <button class="key-btn action" id="keyClear">C</button>
+        </div>
 
-      <div class="presets">
-        <button class="btn-preset" data-sec="60" data-name="1분 타이머">1분</button>
-        <button class="btn-preset" data-sec="180" data-name="라면 3분">🍜 3분</button>
-        <button class="btn-preset" data-sec="300" data-name="5분 휴식">☕ 5분</button>
-        <button class="btn-preset" data-sec="600" data-name="10분 타이머">10분</button>
-        <button class="btn-preset" data-sec="1500" data-name="뽀모도로 25분">🍅 25분</button>
+        <div class="creator-row">
+          <input type="text" id="inLabel" class="label-input" placeholder="이름 입력 (예: 계란 반숙, 스트레칭)" />
+          <button id="addStartBtn" class="btn-primary" disabled>▶ 시작</button>
+        </div>
       </div>
     </div>
 
-    <div id="timersGrid" class="timers-grid"></div>
+    <!-- 3. 추가 타이머 목록 (2개 이상일 때 표시) -->
+    <div id="subTimersGrid" class="sub-timers-grid"></div>
   </section>
 
+  <!-- ================= 탭 2: 스톱워치 ================= -->
   <section id="stopwatchTab" class="tab-panel">
     <div class="sw-card">
       <div id="swCircle" class="sw-circle">
         <div id="swMain" class="sw-time">00:00</div>
         <div id="swMs" class="sw-ms">.00</div>
       </div>
-
       <div class="sw-controls">
         <button id="swStartBtn" class="btn-primary">시작</button>
         <button id="swLapBtn" class="btn-secondary" disabled>구간 기록</button>
         <button id="swResetBtn" class="btn-secondary">초기화</button>
       </div>
-
       <div id="lapList" class="lap-list"></div>
     </div>
   </section>
 
+  <!-- ================= 탭 3: 세계시간 ================= -->
   <section id="worldTab" class="tab-panel">
     <div class="wc-hero">
       <div id="wcLocalTime" class="wc-local-time">00:00:00</div>
       <div id="wcLocalDate" class="wc-local-date">현재 위치 기준</div>
     </div>
-
     <div class="wc-add-bar">
       <select id="citySelect" class="wc-select">
         <option value="America/New_York|뉴욕 (미국)">뉴욕 (미국)</option>
@@ -531,9 +759,8 @@
         <option value="Asia/Singapore|싱가포르">싱가포르</option>
         <option value="Australia/Sydney|시드니 (호주)">시드니 (호주)</option>
       </select>
-      <button id="addCityBtn" class="btn-primary">+ 도시 추가</button>
+      <button id="addCityBtn" class="btn-primary">+ 추가</button>
     </div>
-
     <div id="wcList" class="wc-list"></div>
   </section>
 
@@ -542,6 +769,27 @@
       navigator.serviceWorker.register("./sw.js").catch(() => {});
     }
 
+    // ================= 라이트 / 다크 모드 =================
+    const THEME_KEY = "pwa_clock_theme_v1";
+    const themeBtn = document.getElementById("themeBtn");
+    const metaTheme = document.getElementById("metaThemeColor");
+
+    function applyTheme(mode) {
+      const isLight = mode === "light";
+      document.body.classList.toggle("light-mode", isLight);
+      themeBtn.textContent = isLight ? "🌙 다크" : "☀️ 라이트";
+      metaTheme.setAttribute("content", isLight ? "#f4f6f9" : "#18191c");
+      localStorage.setItem(THEME_KEY, mode);
+    }
+
+    applyTheme(localStorage.getItem(THEME_KEY) || "dark");
+
+    themeBtn.addEventListener("click", () => {
+      const next = document.body.classList.contains("light-mode") ? "dark" : "light";
+      applyTheme(next);
+    });
+
+    // ================= 상단 탭 전환 =================
     document.querySelectorAll(".tab-btn").forEach((btn) => {
       btn.addEventListener("click", () => {
         document.querySelectorAll(".tab-btn").forEach((b) => b.classList.remove("active"));
@@ -551,6 +799,7 @@
       });
     });
 
+    // ================= 공통 오디오 · WakeLock · 알림 =================
     let audioCtx = null;
     let alarmInterval = null;
     let wakeLock = null;
@@ -560,22 +809,24 @@
       if (audioCtx.state === "suspended") audioCtx.resume();
     }
 
-    function playBeepPattern() {
+    // 따르릉~ 전화벨 느낌의 경쾌한 2연속 트릴 사운드
+    function playDdareureung() {
       unlockAudio();
       const now = audioCtx.currentTime;
-      [0, 0.14, 0.28, 0.42].forEach((offset) => {
+      for (let i = 0; i < 8; i++) {
+        const start = now + i * 0.055;
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
-        osc.type = "sine";
-        osc.frequency.setValueAtTime(880, now + offset);
-        gain.gain.setValueAtTime(0.001, now + offset);
-        gain.gain.exponentialRampToValueAtTime(0.28, now + offset + 0.02);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + offset + 0.11);
+        osc.type = "triangle";
+        osc.frequency.setValueAtTime(i % 2 === 0 ? 1046.5 : 1318.5, start); // C6 - E6 트릴
+        gain.gain.setValueAtTime(0.001, start);
+        gain.gain.exponentialRampToValueAtTime(0.28, start + 0.015);
+        gain.gain.exponentialRampToValueAtTime(0.001, start + 0.05);
         osc.connect(gain);
         gain.connect(audioCtx.destination);
-        osc.start(now + offset);
-        osc.stop(now + offset + 0.12);
-      });
+        osc.start(start);
+        osc.stop(start + 0.052);
+      }
     }
 
     async function syncWakeLock() {
@@ -612,10 +863,10 @@
     function updateNotifButton() {
       if (!("Notification" in window)) return (notifBtn.style.display = "none");
       if (Notification.permission === "granted") {
-        notifBtn.textContent = "🔔 알림 켜짐";
+        notifBtn.textContent = "🔔 알림 ON";
         notifBtn.disabled = true;
       } else if (Notification.permission === "denied") {
-        notifBtn.textContent = "🔕 알림 차단됨";
+        notifBtn.textContent = "🔕 차단됨";
       }
     }
     notifBtn.addEventListener("click", async () => {
@@ -627,14 +878,29 @@
 
     function sendNotification(title) {
       if ("Notification" in window && Notification.permission === "granted") {
-        new Notification("⏱️ 타이머 종료!", { body: `${title} 시간이 완료되었습니다.`, silent: true });
+        new Notification("☎️ 따르릉~ 타이머 종료!", {
+          body: `[${title}] 설정한 시간이 완료되었습니다!`,
+          silent: true
+        });
       }
     }
 
-    const TIMER_KEY = "pwa_clock_timers_v2";
-    const CIRCUMFERENCE = 2 * Math.PI * 88;
+    // ================= 1. 타이머 & 세팅 바 =================
+    const TIMER_KEY = "pwa_clock_timers_v3";
+    const HERO_CIRC = 2 * Math.PI * 116; // r = 116, stroke = 18
+    const SUB_CIRC = 2 * Math.PI * 46;   // r = 46, stroke = 10
+
     let timers = [];
     let digitBuffer = "";
+
+    // 접이식 키패드 토글
+    const padDrawer = document.getElementById("padDrawer");
+    const togglePadBtn = document.getElementById("togglePadBtn");
+    togglePadBtn.addEventListener("click", () => {
+      const open = padDrawer.classList.toggle("open");
+      togglePadBtn.classList.toggle("open", open);
+      togglePadBtn.textContent = open ? "✕ 닫기" : "+ 직접 설정";
+    });
 
     function updateKeypadDisplay() {
       const padded = digitBuffer.padStart(6, "0");
@@ -642,17 +908,28 @@
       const mm = padded.slice(2, 4);
       const ss = padded.slice(4, 6);
       const disp = document.getElementById("keypadDisplay");
-      disp.innerHTML = `${hh}<small>시간</small> ${mm}<small>분</small> ${ss}<small>초</small>`;
+      disp.innerHTML = `${hh}<small>시</small> ${mm}<small>분</small> ${ss}<small>초</small>`;
       disp.classList.toggle("has-value", digitBuffer.length > 0);
-      document.getElementById("addStartBtn").disabled = digitBuffer.length === 0;
+      document.getElementById("addStartBtn").disabled = getBufferSeconds() <= 0;
     }
 
     function getBufferSeconds() {
       const padded = digitBuffer.padStart(6, "0");
-      const h = parseInt(padded.slice(0, 2), 10);
-      const m = parseInt(padded.slice(2, 4), 10);
-      const s = parseInt(padded.slice(4, 6), 10);
-      return h * 3600 + m * 60 + s;
+      return (
+        parseInt(padded.slice(0, 2), 10) * 3600 +
+        parseInt(padded.slice(2, 4), 10) * 60 +
+        parseInt(padded.slice(4, 6), 10)
+      );
+    }
+
+    function setBufferFromSeconds(totalSec) {
+      const clamped = Math.min(359999, Math.max(0, totalSec));
+      const h = Math.floor(clamped / 3600);
+      const m = Math.floor((clamped % 3600) / 60);
+      const s = clamped % 60;
+      const raw = `${String(h).padStart(2, "0")}${String(m).padStart(2, "0")}${String(s).padStart(2, "0")}`.replace(/^0+/, "");
+      digitBuffer = raw;
+      updateKeypadDisplay();
     }
 
     document.querySelectorAll(".key-btn[data-key]").forEach((btn) => {
@@ -666,6 +943,13 @@
       });
     });
 
+    document.querySelectorAll(".nudge-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const addSec = parseInt(btn.dataset.nudge, 10);
+        setBufferFromSeconds(getBufferSeconds() + addSec);
+      });
+    });
+
     document.getElementById("keyBack").addEventListener("click", () => {
       digitBuffer = digitBuffer.slice(0, -1);
       updateKeypadDisplay();
@@ -676,21 +960,17 @@
       updateKeypadDisplay();
     });
 
-    document.addEventListener("keydown", (e) => {
-      if (document.activeElement.tagName === "INPUT") return;
-      if (!document.getElementById("timerTab").classList.contains("active")) return;
-      if (/^[0-9]$/.test(e.key)) {
-        if (digitBuffer.length === 0 && e.key === "0") return;
-        if (digitBuffer.length < 6) {
-          digitBuffer += e.key;
-          updateKeypadDisplay();
-        }
-      } else if (e.key === "Backspace") {
-        digitBuffer = digitBuffer.slice(0, -1);
-        updateKeypadDisplay();
-      } else if (e.key === "Enter" && digitBuffer.length > 0) {
-        document.getElementById("addStartBtn").click();
-      }
+    // 랜덤 칩 기능
+    document.getElementById("randomDiceBtn").addEventListener("click", () => {
+      const funPresets = [
+        { sec: 90, name: "👀 눈 피로 풀기 90초" },
+        { sec: 120, name: "🤸 기지개 2분" },
+        { sec: 240, name: "🍵 차 우리기 4분" },
+        { sec: 420, name: "🥚 반숙 계란 7분" },
+        { sec: 900, name: "⚡ 15분 초집중 스프린트" }
+      ];
+      const pick = funPresets[Math.floor(Math.random() * funPresets.length)];
+      addTimer(pick.sec, pick.name);
     });
 
     function saveTimers() {
@@ -731,7 +1011,18 @@
       syncWakeLock();
     }
 
-    function toggleTimer(id) {
+    function promoteToHero(id) {
+      const idx = timers.findIndex((t) => t.id === id);
+      if (idx > 0) {
+        const [picked] = timers.splice(idx, 1);
+        timers.unshift(picked);
+        saveTimers();
+        renderTimers();
+      }
+    }
+
+    function toggleTimer(id, event) {
+      if (event) event.stopPropagation();
       unlockAudio();
       const t = timers.find((item) => item.id === id);
       if (!t) return;
@@ -752,7 +1043,8 @@
       syncAlarmLoop();
     }
 
-    function resetTimer(id) {
+    function resetTimer(id, event) {
+      if (event) event.stopPropagation();
       const t = timers.find((item) => item.id === id);
       if (!t) return;
       t.remainingMs = t.totalMs;
@@ -763,7 +1055,8 @@
       syncAlarmLoop();
     }
 
-    function addOneMinute(id) {
+    function addOneMinute(id, event) {
+      if (event) event.stopPropagation();
       unlockAudio();
       const t = timers.find((item) => item.id === id);
       if (!t) return;
@@ -781,7 +1074,8 @@
       syncAlarmLoop();
     }
 
-    function deleteTimer(id) {
+    function deleteTimer(id, event) {
+      if (event) event.stopPropagation();
       timers = timers.filter((item) => item.id !== id);
       saveTimers();
       renderTimers();
@@ -792,9 +1086,9 @@
     function syncAlarmLoop() {
       const hasRinging = timers.some((t) => t.status === "ringing");
       if (hasRinging && !alarmInterval) {
-        playBeepPattern();
-        alarmInterval = setInterval(playBeepPattern, 1200);
-        if ("vibrate" in navigator) navigator.vibrate([300, 150, 300]);
+        playDdareureung();
+        alarmInterval = setInterval(playDdareureung, 1100);
+        if ("vibrate" in navigator) navigator.vibrate([250, 100, 250, 100, 250]);
       } else if (!hasRinging && alarmInterval) {
         clearInterval(alarmInterval);
         alarmInterval = null;
@@ -806,38 +1100,108 @@
     }
 
     function renderTimers() {
-      const grid = document.getElementById("timersGrid");
-      grid.innerHTML = timers.map((t) => {
-        const isRinging = t.status === "ringing";
-        const isRunning = t.status === "running";
-        const endClock = new Date(t.endTime).toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" });
-        return `
-          <article class="timer-card ${isRinging ? "ringing" : ""}" data-id="${t.id}">
-            <div class="card-top">
-              <span class="timer-title">${escapeHtml(t.label)}</span>
-              <button class="btn-delete" onclick="deleteTimer('${t.id}')">✕</button>
+      const heroSec = document.getElementById("heroTimerSection");
+      const subGrid = document.getElementById("subTimersGrid");
+
+      // 기본 상태: 타이머가 없으면 기본 5분 대기 타이머를 히어로에 표시
+      if (timers.length === 0) {
+        heroSec.innerHTML = `
+          <article class="hero-card">
+            <div class="hero-header">
+              <span class="hero-badge">MAIN TIMER</span>
             </div>
-            <div class="ring-wrapper">
-              <svg viewBox="0 0 196 196">
-                <circle class="ring-bg" cx="98" cy="98" r="88"></circle>
-                <circle class="ring-progress" cx="98" cy="98" r="88"
-                  stroke-dasharray="${CIRCUMFERENCE}" stroke-dashoffset="0"></circle>
+            <div class="hero-title">빠른 시작 또는 시간을 설정하세요</div>
+            <div class="donut-hero-wrap">
+              <svg viewBox="0 0 268 268">
+                <circle class="donut-bg" cx="134" cy="134" r="116"></circle>
+                <circle class="donut-progress" cx="134" cy="134" r="116"
+                  stroke-dasharray="${HERO_CIRC}" stroke-dashoffset="0"></circle>
               </svg>
-              <div class="time-display">
-                <div class="time-main">${formatTime(t.remainingMs)}</div>
-                <div class="time-sub">${isRunning ? `🔔 ${endClock} 종료` : (isRinging ? "시간 종료!" : "일시정지")}</div>
+              <div class="donut-center">
+                <div class="hero-time-main">05:00</div>
+                <div class="hero-time-sub">아래 칩을 눌러 즉시 시작</div>
               </div>
             </div>
-            <div class="card-controls">
-              <button class="${isRinging ? "btn-stop-alarm" : "btn-primary"}" onclick="toggleTimer('${t.id}')">
-                ${isRinging ? "중지" : (isRunning ? "일시정지" : "계속")}
+            <div class="hero-controls">
+              <button class="btn-primary" onclick="addTimer(300, '☕ 기본 5분 타이머')">▶ 5분 바로 시작</button>
+            </div>
+          </article>
+        `;
+        subGrid.innerHTML = "";
+        return;
+      }
+
+      // 첫 번째 타이머(또는 울리는 타이머)를 메인 히어로로 배치
+      const ringingIdx = timers.findIndex((t) => t.status === "ringing");
+      if (ringingIdx > 0) {
+        const [ringTimer] = timers.splice(ringingIdx, 1);
+        timers.unshift(ringTimer);
+      }
+
+      const hero = timers[0];
+      const isHeroRinging = hero.status === "ringing";
+      const isHeroRunning = hero.status === "running";
+      const heroEndClock = new Date(hero.endTime).toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" });
+
+      heroSec.innerHTML = `
+        <article class="hero-card ${isHeroRinging ? "ringing" : ""}" data-id="${hero.id}">
+          <div class="hero-header">
+            <span class="hero-badge">${isHeroRinging ? "☎️ 따르릉~" : "MAIN FOCUS"}</span>
+            <button class="btn-delete" onclick="deleteTimer('${hero.id}', event)" title="삭제">✕</button>
+          </div>
+          <div class="hero-title">${escapeHtml(hero.label)}</div>
+          <div class="donut-hero-wrap">
+            <svg viewBox="0 0 268 268">
+              <circle class="donut-bg" cx="134" cy="134" r="116"></circle>
+              <circle class="donut-progress" cx="134" cy="134" r="116"
+                stroke-dasharray="${HERO_CIRC}" stroke-dashoffset="0"></circle>
+            </svg>
+            <div class="donut-center">
+              <div class="hero-time-main">${formatTime(hero.remainingMs)}</div>
+              <div class="hero-time-sub">
+                ${isHeroRinging ? "☎️ 따르릉~ 시간 종료!" : (isHeroRunning ? `🔔 ${heroEndClock} 종료` : "일시정지됨")}
+              </div>
+            </div>
+          </div>
+          <div class="hero-controls">
+            <button class="${isHeroRinging ? "btn-stop-alarm" : "btn-primary"}" onclick="toggleTimer('${hero.id}', event)">
+              ${isHeroRinging ? "따르릉 끄기" : (isHeroRunning ? "일시정지" : "계속 시작")}
+            </button>
+            <button class="btn-secondary" onclick="addOneMinute('${hero.id}', event)">+1분</button>
+            <button class="btn-secondary" onclick="resetTimer('${hero.id}', event)">초기화</button>
+          </div>
+        </article>
+      `;
+
+      // 나머지 타이머들 (클릭 시 메인 히어로로 승격)
+      const rest = timers.slice(1);
+      subGrid.innerHTML = rest.map((t) => {
+        const isRinging = t.status === "ringing";
+        const isRunning = t.status === "running";
+        return `
+          <article class="sub-card ${isRinging ? "ringing" : ""}" data-id="${t.id}" onclick="promoteToHero('${t.id}')" title="클릭하여 메인으로 확대">
+            <div class="sub-top">
+              <span>${escapeHtml(t.label)}</span>
+              <button class="btn-delete" onclick="deleteTimer('${t.id}', event)">✕</button>
+            </div>
+            <div class="donut-sub-wrap">
+              <svg viewBox="0 0 112 112">
+                <circle class="donut-sub-bg" cx="56" cy="56" r="46"></circle>
+                <circle class="donut-sub-progress" cx="56" cy="56" r="46"
+                  stroke-dasharray="${SUB_CIRC}" stroke-dashoffset="0"></circle>
+              </svg>
+              <div class="sub-time-main">${isRinging ? "따르릉!" : formatTime(t.remainingMs)}</div>
+            </div>
+            <div class="sub-controls">
+              <button class="${isRinging ? "btn-stop-alarm" : "btn-primary"}" onclick="toggleTimer('${t.id}', event)">
+                ${isRinging ? "끄기" : (isRunning ? "정지" : "시작")}
               </button>
-              <button class="btn-secondary" onclick="addOneMinute('${t.id}')">+1분</button>
-              <button class="btn-secondary" onclick="resetTimer('${t.id}')">초기화</button>
+              <button class="btn-secondary" onclick="addOneMinute('${t.id}', event)">+1분</button>
             </div>
           </article>
         `;
       }).join("");
+
       tickTimers();
     }
 
@@ -846,7 +1210,7 @@
       let changed = false;
       let nearestMs = Infinity;
 
-      timers.forEach((t) => {
+      timers.forEach((t, index) => {
         if (t.status === "running") {
           const rem = t.endTime - now;
           if (rem <= 0) {
@@ -859,15 +1223,24 @@
             if (rem < nearestMs) nearestMs = rem;
           }
         }
-        const card = document.querySelector(`.timer-card[data-id="${t.id}"]`);
-        if (card) {
-          card.querySelector(".time-main").textContent = formatTime(t.remainingMs);
-          const ratio = Math.max(0, Math.min(1, t.remainingMs / t.totalMs));
-          card.querySelector(".ring-progress").style.strokeDashoffset = CIRCUMFERENCE * (1 - ratio);
+
+        const ratio = Math.max(0, Math.min(1, t.remainingMs / t.totalMs));
+        if (index === 0) {
+          const heroCard = document.querySelector(`.hero-card[data-id="${t.id}"]`);
+          if (heroCard) {
+            heroCard.querySelector(".hero-time-main").textContent = formatTime(t.remainingMs);
+            heroCard.querySelector(".donut-progress").style.strokeDashoffset = HERO_CIRC * (1 - ratio);
+          }
+        } else {
+          const subCard = document.querySelector(`.sub-card[data-id="${t.id}"]`);
+          if (subCard) {
+            subCard.querySelector(".sub-time-main").textContent = t.status === "ringing" ? "따르릉!" : formatTime(t.remainingMs);
+            subCard.querySelector(".donut-sub-progress").style.strokeDashoffset = SUB_CIRC * (1 - ratio);
+          }
         }
       });
 
-      if (timers.some((t) => t.status === "ringing")) document.title = "🔔 시간 종료! - 웹 시계";
+      if (timers.some((t) => t.status === "ringing")) document.title = "☎️ 따르릉~ 시간 종료! - 웹 시계";
       else if (nearestMs < Infinity) document.title = `${formatTime(nearestMs)} - 웹 시계`;
       else document.title = "웹 시계";
 
@@ -886,13 +1259,17 @@
         digitBuffer = "";
         document.getElementById("inLabel").value = "";
         updateKeypadDisplay();
+        padDrawer.classList.remove("open");
+        togglePadBtn.classList.remove("open");
+        togglePadBtn.textContent = "+ 직접 설정";
       }
     });
 
-    document.querySelectorAll(".btn-preset").forEach((btn) => {
+    document.querySelectorAll(".fun-chip[data-sec]").forEach((btn) => {
       btn.addEventListener("click", () => addTimer(parseInt(btn.dataset.sec, 10), btn.dataset.name));
     });
 
+    // ================= 2. 스톱워치 =================
     let swRunning = false;
     let swStartTime = 0;
     let swElapsed = 0;
@@ -905,10 +1282,7 @@
       const s = totalSec % 60;
       const cs = Math.floor((ms % 1000) / 10);
       const pad = (n) => String(n).padStart(2, "0");
-      return {
-        main: h > 0 ? `${h}:${pad(m)}:${pad(s)}` : `${pad(m)}:${pad(s)}`,
-        ms: `.${pad(cs)}`
-      };
+      return { main: h > 0 ? `${h}:${pad(m)}:${pad(s)}` : `${pad(m)}:${pad(s)}`, ms: `.${pad(cs)}` };
     }
 
     function updateSwDisplay() {
@@ -920,10 +1294,7 @@
 
     function renderLaps() {
       const list = document.getElementById("lapList");
-      if (laps.length === 0) {
-        list.innerHTML = "";
-        return;
-      }
+      if (laps.length === 0) return (list.innerHTML = "");
       const diffs = laps.map((l) => l.diff);
       const minDiff = laps.length >= 2 ? Math.min(...diffs) : -1;
       const maxDiff = laps.length >= 2 ? Math.max(...diffs) : -1;
@@ -985,6 +1356,7 @@
       syncWakeLock();
     });
 
+    // ================= 3. 세계시간 =================
     const WC_KEY = "pwa_world_cities_v1";
     let savedCities = JSON.parse(localStorage.getItem(WC_KEY) || "null") || [
       { tz: "America/New_York", name: "뉴욕 (미국)" },
@@ -992,9 +1364,7 @@
       { tz: "Asia/Tokyo", name: "도쿄 (일본)" }
     ];
 
-    function saveCities() {
-      localStorage.setItem(WC_KEY, JSON.stringify(savedCities));
-    }
+    function saveCities() { localStorage.setItem(WC_KEY, JSON.stringify(savedCities)); }
 
     function getHourDiffText(tz) {
       const now = new Date();
@@ -1041,8 +1411,7 @@
     }
 
     document.getElementById("addCityBtn").addEventListener("click", () => {
-      const val = document.getElementById("citySelect").value;
-      const [tz, name] = val.split("|");
+      const [tz, name] = document.getElementById("citySelect").value.split("|");
       if (!savedCities.some((c) => c.tz === tz)) {
         savedCities.push({ tz, name });
         saveCities();
@@ -1050,6 +1419,7 @@
       }
     });
 
+    // ================= 초기화 =================
     loadTimers();
     updateNotifButton();
     renderTimers();
